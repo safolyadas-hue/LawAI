@@ -43,7 +43,8 @@ export default async (req: Request) => {
   try {
     const rateLimits = getStore("rate-limits");
     const currentCountBlob = await rateLimits.get(blobKey);
-    let currentCount = currentCountBlob ? parseInt(currentCountBlob, 10) : 0;
+    const currentCountStr = currentCountBlob ? Buffer.from(currentCountBlob as ArrayBuffer).toString('utf-8') : "";
+    let currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0;
     
     if (currentCount >= 25) {
       return Response.json({ error: "Too Many Requests: Rate limit exceeded. Try again next hour." }, { status: 429 });
