@@ -22,7 +22,7 @@ export default function ChatInterface({ documentText, setSimplifiedText }: Props
       : query;
 
     try {
-      const res = await fetch("/api/analyze", {
+      const res = await fetch("/.netlify/functions/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

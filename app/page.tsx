@@ -13,7 +13,7 @@ export default function Home() {
   const handleAnalyze = async () => {
     if (!documentText) return;
     try {
-      const res = await fetch("/api/analyze", {
+      const res = await fetch("/.netlify/functions/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
