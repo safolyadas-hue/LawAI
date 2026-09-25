@@ -22,10 +22,15 @@ export default function ChatInterface({ documentText, setSimplifiedText }: Props
       : query;
 
     try {
+      const tokenRes = await fetch("/.netlify/functions/get-token", { method: "POST" });
+      if (!tokenRes.ok) throw new Error("Failed to authenticate request");
+      const { token } = await tokenRes.json();
+
       const res = await fetch("/.netlify/functions/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-app-token": token
         },
         body: JSON.stringify({ 
           query: fullPrompt, 

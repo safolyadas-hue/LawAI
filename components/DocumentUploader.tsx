@@ -53,8 +53,11 @@ export default function DocumentUploader({ setDocumentText, onAnalyze }: Props) 
       <h2 id="upload-heading" className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
         Upload Legal Document
       </h2>
-      <p className="text-slate-600 dark:text-slate-400 mb-6 text-center max-w-lg">
+      <p className="text-slate-600 dark:text-slate-400 mb-2 text-center max-w-lg">
         {fileName ? `Selected: ${fileName}` : "Drag and drop your .txt or .md file here, or select a document to instantly translate complex clauses into plain, accessible language."}
+      </p>
+      <p className="text-slate-500 dark:text-slate-500 italic text-sm mb-6 text-center max-w-lg">
+        Please note: Uploaded documents are sent to Google's Gemini API for analysis. Do not upload documents containing sensitive personal data.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center">
