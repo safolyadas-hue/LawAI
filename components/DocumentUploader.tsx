@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 
 type Props = {
   setDocumentText: (text: string) => void;
@@ -10,6 +10,9 @@ type Props = {
 
 export default function DocumentUploader({ setDocumentText, onAnalyze, title = "Upload Legal Document", hideAnalyzeButton = false }: Props) {
   const [fileName, setFileName] = useState<string>("");
+  const uniqueId = useId();
+  const headingId = `upload-heading-${uniqueId}`;
+  const inputId = `file-upload-${uniqueId}`;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,11 +51,11 @@ export default function DocumentUploader({ setDocumentText, onAnalyze, title = "
   return (
     <section
       className="w-full mx-auto flex flex-col items-center justify-center p-8 md:p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-950"
-      aria-labelledby="upload-heading"
+      aria-labelledby={headingId}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <h2 id="upload-heading" className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
+      <h2 id={headingId} className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
         {title}
       </h2>
       <p className="text-slate-600 dark:text-slate-400 mb-2 text-center max-w-lg">
@@ -64,13 +67,13 @@ export default function DocumentUploader({ setDocumentText, onAnalyze, title = "
 
       <div className="flex flex-col sm:flex-row gap-4 items-center">
         <label
-          htmlFor="file-upload"
+          htmlFor={inputId}
           className="cursor-pointer px-6 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-950"
         >
           <span>Browse Files</span>
           <input
-            id="file-upload"
-            name="file-upload"
+            id={inputId}
+            name={inputId}
             type="file"
             accept=".txt,.md"
             onChange={handleFileChange}
