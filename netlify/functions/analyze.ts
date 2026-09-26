@@ -8,6 +8,11 @@ export default async (req: Request) => {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
+  const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+  if (contentLength > 30000) {
+    return Response.json({ error: "Payload Too Large" }, { status: 413 });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   const appSecret = process.env.APP_SECRET;
 
@@ -57,7 +62,7 @@ export default async (req: Request) => {
       return Response.json({ error: "Bad Request: Text exceeds the 25,000 character limit." }, { status: 400 });
     }
 
-    const systemPrompt = "You are an expert legal assistant. Translate the following complex legal text into simple, 8th-grade level plain English. Explicitly highlight any hidden risks or liabilities for the user. Use H3 (###) for titles, horizontal rules (***) for main breaks, and clear bullet points for risk lists.";
+    const systemPrompt = "You are an expert legal assistant. Translate the following complex legal text into simple, 8th-grade level plain English. Explicitly highlight any hidden risks or liabilities for the user. Use H3 (###) for titles, horizontal rules (***) for main breaks, and clear bullet points for risk lists. Always end your response with a short disclaimer: 'This is general information, not legal advice — consider consulting a licensed attorney for your specific situation.'";
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 

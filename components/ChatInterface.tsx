@@ -1,35 +1,50 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { analyzeDocument } from "@/lib/analyzeDocument";
+import ReactMarkdown from "react-markdown";
 
 type Props = {
   documentText: string;
   simplifiedText?: string;
-  setSimplifiedText: (text: string) => void;
+  chatHistory: {question: string; answer: string}[];
+  setChatHistory: (history: {question: string; answer: string}[]) => void;
 };
 
-export default function ChatInterface({ documentText, simplifiedText, setSimplifiedText }: Props) {
+export default function ChatInterface({ documentText, simplifiedText, chatHistory, setChatHistory }: Props) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [liveMessage, setLiveMessage] = useState("");
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     setLoading(true);
+    setLiveMessage("Loading response...");
 
     const context = simplifiedText || documentText;
     const fullPrompt = context 
       ? `Question: ${query}\n\nDocument Context:\n${context}`
       : query;
 
+    const currentQuery = query;
+    setQuery("");
+
     try {
       const simplified_text = await analyzeDocument(fullPrompt, documentText);
-      setSimplifiedText(simplified_text);
-      setQuery("");
+      setChatHistory([...chatHistory, { question: currentQuery, answer: simplified_text }]);
+      setLiveMessage("Response received.");
     } catch (error) {
-      setSimplifiedText("Sorry, an error occurred while analyzing the document.");
+      setChatHistory([...chatHistory, { question: currentQuery, answer: "Sorry, an error occurred while analyzing the document." }]);
+      setLiveMessage("An error occurred.");
     } finally {
       setLoading(false);
     }
@@ -40,7 +55,24 @@ export default function ChatInterface({ documentText, simplifiedText, setSimplif
       className="shrink-0 sticky bottom-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] z-20 transition-colors duration-200"
       aria-label="Chat with AI Assistant"
     >
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </div>
       <div className="max-w-4xl mx-auto flex flex-col gap-4">
+        {chatHistory.length > 0 && (
+          <div className="flex flex-col gap-4 max-h-[40vh] overflow-y-auto mb-2" ref={chatContainerRef}>
+            {chatHistory.map((chat, idx) => (
+              <div key={idx} className="flex flex-col gap-2 text-sm">
+                <div className="self-end bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 px-4 py-2 rounded-2xl max-w-[80%]">
+                  {chat.question}
+                </div>
+                <div className="self-start bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-2xl max-w-[80%] prose dark:prose-invert">
+                  <ReactMarkdown>{chat.answer}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <form
           className="flex gap-3"
           onSubmit={handleSubmit}

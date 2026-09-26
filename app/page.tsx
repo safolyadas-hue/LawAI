@@ -1,46 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import dynamic from "next/dynamic";
 import DocumentUploader from "@/components/DocumentUploader";
-import ComparisonView from "@/components/ComparisonView";
+const ComparisonView = dynamic(() => import("@/components/ComparisonView"));
 import ChatInterface from "@/components/ChatInterface";
 import ThemeToggle from "@/components/ThemeToggle";
-import { analyzeDocument } from "@/lib/analyzeDocument";
 import ReactMarkdown from "react-markdown";
+import { useDocumentAnalysis } from "@/lib/useDocumentAnalysis";
 
 export default function Home() {
-  const [documentText, setDocumentText] = useState("");
-  const [simplifiedText, setSimplifiedText] = useState("");
-  const [secondDocumentText, setSecondDocumentText] = useState("");
-  const [comparisonResultText, setComparisonResultText] = useState("");
-  const [isComparing, setIsComparing] = useState(false);
-
-  const handleAnalyze = async () => {
-    if (!documentText) return;
-    try {
-      const query = `Please summarize and analyze this legal document. Highlight any risks.\n\nDocument:\n${documentText}`;
-      const simplified_text = await analyzeDocument(query);
-      setSimplifiedText(simplified_text);
-    } catch (err) {
-      console.error(err);
-      setSimplifiedText("Sorry, an error occurred while analyzing the document.");
-    }
-  };
-
-  const handleCompare = async () => {
-    if (!documentText || !secondDocumentText) return;
-    setIsComparing(true);
-    try {
-      const query = `Please compare these two legal documents. Identify key differences, and which document favors the user more, in plain English.\n\nDocument 1:\n${documentText}\n\nDocument 2:\n${secondDocumentText}`;
-      const comparison_text = await analyzeDocument(query);
-      setComparisonResultText(comparison_text);
-    } catch (err) {
-      console.error(err);
-      setComparisonResultText("Sorry, an error occurred while comparing the documents.");
-    } finally {
-      setIsComparing(false);
-    }
-  };
+  const {
+    documentText,
+    setDocumentText,
+    simplifiedText,
+    setSimplifiedText,
+    secondDocumentText,
+    setSecondDocumentText,
+    comparisonResultText,
+    isComparing,
+    chatHistory,
+    setChatHistory,
+    handleAnalyze,
+    handleCompare,
+  } = useDocumentAnalysis();
 
   return (
     <div className="h-screen overflow-hidden flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
@@ -113,7 +95,12 @@ export default function Home() {
       </main>
 
       {/* Sticky Chat at Bottom */}
-      <ChatInterface documentText={documentText} simplifiedText={simplifiedText} setSimplifiedText={setSimplifiedText} />
+      <ChatInterface 
+        documentText={documentText} 
+        simplifiedText={simplifiedText} 
+        chatHistory={chatHistory} 
+        setChatHistory={setChatHistory} 
+      />
     </div>
   );
 }
