@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { analyzeDocument } from "@/lib/analyzeDocument";
-import ReactMarkdown from "react-markdown";
 
 type Props = {
   documentText: string;
@@ -15,13 +14,6 @@ export default function ChatInterface({ documentText, simplifiedText, chatHistor
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,20 +51,6 @@ export default function ChatInterface({ documentText, simplifiedText, chatHistor
         {liveMessage}
       </div>
       <div className="max-w-4xl mx-auto flex flex-col gap-4">
-        {chatHistory.length > 0 && (
-          <div className="flex flex-col gap-4 max-h-[40vh] overflow-y-auto mb-2" ref={chatContainerRef}>
-            {chatHistory.map((chat, idx) => (
-              <div key={idx} className="flex flex-col gap-2 text-sm">
-                <div className="self-end bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 px-4 py-2 rounded-2xl max-w-[80%]">
-                  {chat.question}
-                </div>
-                <div className="self-start bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-2xl max-w-[80%] prose dark:prose-invert">
-                  <ReactMarkdown>{chat.answer}</ReactMarkdown>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
         <form
           className="flex gap-3"
           onSubmit={handleSubmit}

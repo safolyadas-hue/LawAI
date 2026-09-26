@@ -1,11 +1,20 @@
 import ReactMarkdown from "react-markdown";
+import { useRef, useEffect } from "react";
 
 type Props = {
   documentText: string;
   simplifiedText: string;
+  chatHistory?: {question: string; answer: string}[];
 };
 
-export default function ComparisonView({ documentText, simplifiedText }: Props) {
+export default function ComparisonView({ documentText, simplifiedText, chatHistory = [] }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, simplifiedText]);
   return (
     <section
       className="w-full flex flex-col md:flex-row gap-6 h-[60vh] md:h-[70vh] min-h-0"
@@ -42,8 +51,9 @@ export default function ComparisonView({ documentText, simplifiedText }: Props) 
           tabIndex={0}
           role="region"
           aria-label="AI Simplified Content"
+          ref={scrollRef}
         >
-          <div className="text-slate-700 dark:text-slate-300 break-words">
+          <div className="text-slate-700 dark:text-slate-300 break-words flex flex-col gap-6">
             {simplifiedText ? (
               <div className="prose dark:prose-invert markdown-content max-w-none">
                 <ReactMarkdown>
@@ -52,6 +62,21 @@ export default function ComparisonView({ documentText, simplifiedText }: Props) 
               </div>
             ) : (
               <p className="text-slate-500 dark:text-slate-400 italic">Analysis will appear here after asking the AI.</p>
+            )}
+
+            {chatHistory.length > 0 && (
+              <div className="flex flex-col gap-4 mt-4 border-t border-slate-200 dark:border-slate-800 pt-6">
+                {chatHistory.map((chat, idx) => (
+                  <div key={idx} className="flex flex-col gap-2 text-sm">
+                    <div className="self-end bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 px-4 py-2 rounded-2xl max-w-[80%]">
+                      {chat.question}
+                    </div>
+                    <div className="self-start bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-2xl max-w-[80%] prose dark:prose-invert">
+                      <ReactMarkdown>{chat.answer}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>

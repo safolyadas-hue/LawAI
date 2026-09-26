@@ -74,7 +74,7 @@ export default function Home() {
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
             Document Analysis
           </h3>
-          <ComparisonView documentText={documentText} simplifiedText={simplifiedText} />
+          <ComparisonView documentText={documentText} simplifiedText={simplifiedText} chatHistory={chatHistory} />
         </section>
 
         {/* Document Comparison Result Section */}
