@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { getStore } from "@netlify/blobs";
 import { verifyToken } from "./verifyToken";
+import { checkRateLimit } from "./checkRateLimit";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
@@ -33,7 +34,7 @@ export default async (req: Request) => {
     const currentCountStr = currentCountBlob ? Buffer.from(currentCountBlob as ArrayBuffer).toString('utf-8') : "";
     let currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0;
     
-    if (currentCount >= 25) {
+    if (!checkRateLimit(currentCount)) {
       return Response.json({ error: "Too Many Requests: Rate limit exceeded. Try again next hour." }, { status: 429 });
     }
 
@@ -44,8 +45,8 @@ export default async (req: Request) => {
   }
 
   try {
-    const body = await req.json();
-    const userText = body.query || body.text || body.input || body.message || Object.values(body)[0];
+    const body: { query: string } = await req.json();
+    const userText = body.query;
 
     if (!userText) {
       return Response.json({ error: "Bad Request" }, { status: 400 });

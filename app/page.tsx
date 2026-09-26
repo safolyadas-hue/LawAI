@@ -61,7 +61,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 pb-12">
+      <main id="main-content" className="flex-1 overflow-y-auto min-h-0 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 pb-12">
         {/* Upload Section */}
         <section className="flex flex-col gap-6">
           <DocumentUploader setDocumentText={setDocumentText} onAnalyze={handleAnalyze} />
@@ -113,7 +113,7 @@ export default function Home() {
       </main>
 
       {/* Sticky Chat at Bottom */}
-      <ChatInterface documentText={documentText} setSimplifiedText={setSimplifiedText} />
+      <ChatInterface documentText={documentText} simplifiedText={simplifiedText} setSimplifiedText={setSimplifiedText} />
     </div>
   );
 }

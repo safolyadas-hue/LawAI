@@ -5,10 +5,11 @@ import { analyzeDocument } from "@/lib/analyzeDocument";
 
 type Props = {
   documentText: string;
+  simplifiedText?: string;
   setSimplifiedText: (text: string) => void;
 };
 
-export default function ChatInterface({ documentText, setSimplifiedText }: Props) {
+export default function ChatInterface({ documentText, simplifiedText, setSimplifiedText }: Props) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,8 +19,9 @@ export default function ChatInterface({ documentText, setSimplifiedText }: Props
 
     setLoading(true);
 
-    const fullPrompt = documentText 
-      ? `Question: ${query}\n\nDocument Context:\n${documentText}`
+    const context = simplifiedText || documentText;
+    const fullPrompt = context 
+      ? `Question: ${query}\n\nDocument Context:\n${context}`
       : query;
 
     try {
