@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { analyzeDocument } from "@/lib/analyzeDocument";
 
 type Props = {
   documentText: string;
@@ -22,26 +23,8 @@ export default function ChatInterface({ documentText, setSimplifiedText }: Props
       : query;
 
     try {
-      const tokenRes = await fetch("/.netlify/functions/get-token", { method: "POST" });
-      if (!tokenRes.ok) throw new Error("Failed to authenticate request");
-      const { token } = await tokenRes.json();
-
-      const res = await fetch("/.netlify/functions/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-app-token": token
-        },
-        body: JSON.stringify({ 
-          query: fullPrompt, 
-          documentText
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to analyze");
-      
-      const data = await res.json();
-      setSimplifiedText(data.simplified_text);
+      const simplified_text = await analyzeDocument(fullPrompt, documentText);
+      setSimplifiedText(simplified_text);
       setQuery("");
     } catch (error) {
       setSimplifiedText("Sorry, an error occurred while analyzing the document.");

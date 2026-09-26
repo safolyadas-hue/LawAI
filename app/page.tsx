@@ -5,34 +5,40 @@ import DocumentUploader from "@/components/DocumentUploader";
 import ComparisonView from "@/components/ComparisonView";
 import ChatInterface from "@/components/ChatInterface";
 import ThemeToggle from "@/components/ThemeToggle";
+import { analyzeDocument } from "@/lib/analyzeDocument";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
   const [documentText, setDocumentText] = useState("");
   const [simplifiedText, setSimplifiedText] = useState("");
+  const [secondDocumentText, setSecondDocumentText] = useState("");
+  const [comparisonResultText, setComparisonResultText] = useState("");
+  const [isComparing, setIsComparing] = useState(false);
 
   const handleAnalyze = async () => {
     if (!documentText) return;
     try {
-      const tokenRes = await fetch("/.netlify/functions/get-token", { method: "POST" });
-      if (!tokenRes.ok) throw new Error("Failed to authenticate request");
-      const { token } = await tokenRes.json();
-
-      const res = await fetch("/.netlify/functions/analyze", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-app-token": token
-        },
-        body: JSON.stringify({ 
-          query: `Please summarize and analyze this legal document. Highlight any risks.\n\nDocument:\n${documentText}` 
-        }),
-      });
-      const data = await res.json();
-      if (data.simplified_text) {
-        setSimplifiedText(data.simplified_text);
-      }
+      const query = `Please summarize and analyze this legal document. Highlight any risks.\n\nDocument:\n${documentText}`;
+      const simplified_text = await analyzeDocument(query);
+      setSimplifiedText(simplified_text);
     } catch (err) {
       console.error(err);
+      setSimplifiedText("Sorry, an error occurred while analyzing the document.");
+    }
+  };
+
+  const handleCompare = async () => {
+    if (!documentText || !secondDocumentText) return;
+    setIsComparing(true);
+    try {
+      const query = `Please compare these two legal documents. Identify key differences, and which document favors the user more, in plain English.\n\nDocument 1:\n${documentText}\n\nDocument 2:\n${secondDocumentText}`;
+      const comparison_text = await analyzeDocument(query);
+      setComparisonResultText(comparison_text);
+    } catch (err) {
+      console.error(err);
+      setComparisonResultText("Sorry, an error occurred while comparing the documents.");
+    } finally {
+      setIsComparing(false);
     }
   };
 
@@ -57,8 +63,28 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 pb-12">
         {/* Upload Section */}
-        <section className="flex flex-col gap-2">
+        <section className="flex flex-col gap-6">
           <DocumentUploader setDocumentText={setDocumentText} onAnalyze={handleAnalyze} />
+          
+          <div className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-800 pt-6">
+            <DocumentUploader 
+              setDocumentText={setSecondDocumentText} 
+              title="Upload Second Document (For Comparison)"
+              hideAnalyzeButton={true}
+            />
+            {secondDocumentText && documentText && (
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleCompare}
+                  disabled={isComparing}
+                  className="px-6 py-3 bg-teal-600 dark:bg-teal-500 hover:bg-teal-700 dark:hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 dark:focus-within:ring-offset-slate-950"
+                >
+                  {isComparing ? "Comparing..." : "Compare Documents"}
+                </button>
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Comparison Section */}
@@ -68,6 +94,22 @@ export default function Home() {
           </h3>
           <ComparisonView documentText={documentText} simplifiedText={simplifiedText} />
         </section>
+
+        {/* Document Comparison Result Section */}
+        {comparisonResultText && (
+          <section className="flex flex-col gap-4">
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+              Comparison Results
+            </h3>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 overflow-y-auto min-h-[30vh]">
+               <div className="prose dark:prose-invert markdown-content max-w-none">
+                 <ReactMarkdown>
+                   {comparisonResultText}
+                 </ReactMarkdown>
+               </div>
+            </div>
+          </section>
+        )}
       </main>
 
       {/* Sticky Chat at Bottom */}

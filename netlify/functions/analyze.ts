@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { getStore } from "@netlify/blobs";
+import { verifyToken } from "./verifyToken";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
@@ -16,23 +17,9 @@ export default async (req: Request) => {
 
   // 1. Anti-replay Token verification
   const token = req.headers.get("x-app-token");
-  if (!token) {
-    return Response.json({ error: "Unauthorized: Missing token" }, { status: 401 });
-  }
-
-  const [expiryStr, signature] = token.split(".");
-  if (!expiryStr || !signature) {
-    return Response.json({ error: "Unauthorized: Invalid token format" }, { status: 401 });
-  }
-
-  const expiry = parseInt(expiryStr, 10);
-  if (Date.now() > expiry) {
-    return Response.json({ error: "Unauthorized: Token expired" }, { status: 401 });
-  }
-
-  const expectedSignature = crypto.createHmac("sha256", appSecret).update(expiryStr).digest("hex");
-  if (signature !== expectedSignature) {
-    return Response.json({ error: "Unauthorized: Invalid signature" }, { status: 401 });
+  const verification = verifyToken(token, appSecret);
+  if (!verification.valid) {
+    return Response.json({ error: verification.error }, { status: 401 });
   }
 
   // 2. Rate Limiting per IP

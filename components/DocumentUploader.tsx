@@ -3,10 +3,12 @@ import React, { useState } from "react";
 
 type Props = {
   setDocumentText: (text: string) => void;
-  onAnalyze: () => void;
+  onAnalyze?: () => void;
+  title?: string;
+  hideAnalyzeButton?: boolean;
 };
 
-export default function DocumentUploader({ setDocumentText, onAnalyze }: Props) {
+export default function DocumentUploader({ setDocumentText, onAnalyze, title = "Upload Legal Document", hideAnalyzeButton = false }: Props) {
   const [fileName, setFileName] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +53,7 @@ export default function DocumentUploader({ setDocumentText, onAnalyze }: Props) 
       onDrop={handleDrop}
     >
       <h2 id="upload-heading" className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
-        Upload Legal Document
+        {title}
       </h2>
       <p className="text-slate-600 dark:text-slate-400 mb-2 text-center max-w-lg">
         {fileName ? `Selected: ${fileName}` : "Drag and drop your .txt or .md file here, or select a document to instantly translate complex clauses into plain, accessible language."}
@@ -76,14 +78,16 @@ export default function DocumentUploader({ setDocumentText, onAnalyze }: Props) 
             aria-label="Upload a document for analysis"
           />
         </label>
-        <button
-          type="button"
-          onClick={onAnalyze}
-          className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus-within:ring-offset-slate-950 transition-colors"
-          aria-label="Upload and analyze the selected document"
-        >
-          Upload & Analyze
-        </button>
+        {!hideAnalyzeButton && (
+          <button
+            type="button"
+            onClick={onAnalyze}
+            className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus-within:ring-offset-slate-950 transition-colors"
+            aria-label="Upload and analyze the selected document"
+          >
+            Upload & Analyze
+          </button>
+        )}
       </div>
     </section>
   );
