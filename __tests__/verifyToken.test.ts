@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { verifyToken } from './verifyToken';
+import { verifyToken } from '../netlify/functions/verifyToken';
 import crypto from 'crypto';
 
 describe('verifyToken', () => {
